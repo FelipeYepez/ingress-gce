@@ -569,6 +569,11 @@ func DeleteDestinationRule(s *Sandbox, namespace, name string) error {
 
 // EnsureServiceAttachment ensures a ServiceAttachment resource
 func EnsureServiceAttachment(s *Sandbox, saName, svcName, subnetName string) (*sav1.ServiceAttachment, error) {
+	return EnsureServiceAttachmentWithSpec(s, saName, svcName, subnetName, nil)
+}
+
+// EnsureServiceAttachmentWithSpec ensures a ServiceAttachment resource with specific ReconcileConnections
+func EnsureServiceAttachmentWithSpec(s *Sandbox, saName, svcName, subnetName string, reconcileConnections *bool) (*sav1.ServiceAttachment, error) {
 	sa := &sav1.ServiceAttachment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      saName,
@@ -582,6 +587,7 @@ func EnsureServiceAttachment(s *Sandbox, saName, svcName, subnetName string) (*s
 				Kind:     "service",
 				Name:     svcName,
 			},
+			ReconcileConnections: reconcileConnections,
 		},
 	}
 

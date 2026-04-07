@@ -28,6 +28,8 @@ import (
 	"strings"
 	"time"
 
+	ga "google.golang.org/api/compute/v1"
+
 	"github.com/GoogleCloudPlatform/k8s-cloud-provider/pkg/cloud"
 	"github.com/GoogleCloudPlatform/k8s-cloud-provider/pkg/cloud/meta"
 	"github.com/google/go-cmp/cmp"
@@ -1227,4 +1229,27 @@ func CheckNEGEndpointIPs(ctx context.Context, c cloud.Cloud, negName string, zon
 		}
 		return true, nil
 	})
+}
+
+// GetServiceAttachmentCR fetches the raw ServiceAttachment CR from the K8s API.
+func GetServiceAttachmentCR(s *Sandbox, saName string) (*sav1.ServiceAttachment, error) {
+	return s.f.SAClient.Get(s.Namespace, saName)
+}
+
+// GetGCEServiceAttachmentFromURL fetches the raw compute.ServiceAttachment resource from the GCP API.
+func GetGCEServiceAttachmentFromURL(s *Sandbox, gceSAURL string) (*ga.ServiceAttachment, error) {
+	key, err := cloud.ParseResourceURL(gceSAURL)
+	if err != nil {
+		return nil, err
+	}
+	return s.f.Cloud.ServiceAttachments().Get(context.Background(), key.Key)
+}
+
+// PatchGCEServiceAttachment patches the GCE ServiceAttachment.
+func PatchGCEServiceAttachment(s *Sandbox, gceSAURL string, sa *ga.ServiceAttachment) error {
+	key, err := cloud.ParseResourceURL(gceSAURL)
+	if err != nil {
+		return err
+	}
+	return s.f.Cloud.ServiceAttachments().Patch(context.Background(), key.Key, sa)
 }
